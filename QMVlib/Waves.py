@@ -5,8 +5,6 @@ import copy
 import hashlib
 from scipy import integrate
 from typing import Callable, List, Tuple, Optional, Union, Type
-import sys
-sys.path.insert(0, '/Users/nswanson/QMVManimGL/animations/')
 from QMVlib.humanfaces import ObamaFace
 
 class Wave1DConfig:

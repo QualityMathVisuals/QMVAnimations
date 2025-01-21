@@ -11,8 +11,6 @@ from scipy.special import jn_zeros, jv, lpmn, spherical_jn
 import scipy.optimize as opt
 from scipy.interpolate import Rbf
 from typing import Callable, List, Tuple, Optional, Union, Type
-import sys
-sys.path.insert(0, '/Users/nswanson/QMVManimGL/animations/')
 from QMVlib import * 
 
 class WaveConfig:

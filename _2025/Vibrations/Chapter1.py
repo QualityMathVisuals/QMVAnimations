@@ -3,7 +3,6 @@ Chapter 1: 1D Waves and Fourier Series
 '''
 from manimlib import *
 from scipy.misc import derivative
-import sys
 from _2025.Vibrations.WavesV3 import *
 from QMVlib import * 
 
