@@ -1,0 +1,15 @@
+directories:
+  mirror_module_path: True
+  removed_mirror_prefix: "/Users/nswanson/QMVManimGL/QMVAnimations/"
+  base: "/Users/nswanson/QMVManimGL/media/"
+  subdirs:
+    raster_images: "images/raster"
+    vector_images: "images/vector"
+    downloads: "manim_downloads"
+text:
+  font: "Times New Roman"
+fps: 30
+camera:
+  background_color: "#0D0D0D"
+log_level: "ERROR"
+universal_import_line: "from manimlib import *"
