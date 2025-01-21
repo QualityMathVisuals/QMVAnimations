@@ -7,7 +7,7 @@ DEFAULT_WAVE_LENGTH = 5
 # Abstract Wave Mobject
 class WaveMobject(TipableVMobject, ABC):
     """
-    Abstract base class for all 1D wave objects (e.g., string waves).
+    Abstract base class for all 1D wave objects (e.g., string waves). test
 
     Parameters:
     - length (float): The length of the wave's domain.
