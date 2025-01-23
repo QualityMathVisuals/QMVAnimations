@@ -2,7 +2,9 @@
 **/__pycache__/
 *.py[cod]
 *$py.class
-
+QMVlib
+_2025
+OldRefactored
 # C extensions
 *.so
 
