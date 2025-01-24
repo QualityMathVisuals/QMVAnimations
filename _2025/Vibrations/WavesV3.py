@@ -750,6 +750,52 @@ class Fourier2DCalculator:
                 pickle.dump(self.fourier_coeff_cache, f)
             self.should_update_cache = False
 
+class PictureScene(InteractiveScene):
+    def construct(self):
+        # Settup Scene
+        t_tracker = ValueTracker(0)
+        light = self.camera.light_source
+        light.move_to(OUT * 2.5)
+        light_indicator = Sphere(radius=0.1).move_to(light.get_center())
+        self.frame.reorient(43, 60, 1, IN, 10)
+        self.frame.add_updater(lambda m, dt: m.increment_theta(dt * 3 * DEGREES)) #type: ignore
+        config = MembraneConfig(
+            resolution = (40, 40),
+            dampening = 0.0,
+            amplitude = 3,
+            wave_speed = 5,
+        )
+
+        membrane_type = StandingCircularMembrane
+        membrane_str = 'radial'
+        membrane_kwargs = {'radius': 4}
+        M, N = 8, 8
+
+        # membrane_type = StandingRectangularMembrane
+        # membrane_str = 'rectangular'
+        # membrane_kwargs = {'width': 8, 'height':10}
+        # M, N = 15, 15
+
+
+        # Create some standing waves
+        standing_2D_waves = [
+            membrane_type(0, 4, shading=(0.2, 0.2, 0.1), config=config, **membrane_kwargs)
+        ]
+        wave_mesh = standing_2D_waves[0].get_mesh(
+            stroke_color=WHITE,
+            stroke_opacity=0.7,
+            stroke_width=0.7
+        )
+        for standing_2D_wave in standing_2D_waves:
+            standing_2D_wave.attach_value_tracker(t_tracker)
+            standing_2D_wave.always_update_color_for_height(QMV_PURPLE_B, QMV_BLUE_A)
+            self.add(standing_2D_wave, wave_mesh)
+            self.play(t_tracker.animate.increment_value(1.2), run_time=1.2, rate_func=linear)
+
+        # Freeze Frame  
+        t_tracker.set_value(1.23)
+        self.frame.set_euler_angles(0.84837751, 0.83608644, 0.01745329)
+
 
 class MembraneAnimationScene(InteractiveScene):
     def construct(self):
@@ -766,27 +812,27 @@ class MembraneAnimationScene(InteractiveScene):
             amplitude = 3,
             wave_speed = 5,
         )
-        '''
+
         membrane_type = StandingCircularMembrane
         membrane_str = 'radial'
         membrane_kwargs = {'radius': 5}
         M, N = 8, 8
-        '''
-        membrane_type = StandingRectangularMembrane
-        membrane_str = 'rectangular'
-        membrane_kwargs = {'width': 8, 'height':10}
-        M, N = 15, 15
+
+        # membrane_type = StandingRectangularMembrane
+        # membrane_str = 'rectangular'
+        # membrane_kwargs = {'width': 8, 'height':10}
+        # M, N = 15, 15
 
 
         # Create some standing waves
         standing_2D_waves = [
-            membrane_type(1, 1, shading=(0.4, 0.2, 0.1), config=config, **membrane_kwargs),
+            membrane_type(0, 1, shading=(0.4, 0.2, 0.1), config=config, **membrane_kwargs),
+            membrane_type(0, 2, shading=(0.4, 0.2, 0.1), config=config, **membrane_kwargs),
             membrane_type(1, 2, shading=(0.4, 0.2, 0.1), config=config, **membrane_kwargs),
-            membrane_type(2, 2, shading=(0.4, 0.2, 0.1), config=config, **membrane_kwargs),
         ]
         for standing_2D_wave in standing_2D_waves:
             standing_2D_wave.attach_value_tracker(t_tracker)
-            standing_2D_wave.always_update_color_for_height(RED, YELLOW)
+            standing_2D_wave.always_update_color_for_height(QMV_BLUE_A, QMV_PINK_A)
             self.add(standing_2D_wave)
             self.play(t_tracker.animate.increment_value(3), run_time=3, rate_func=linear)
             self.remove(standing_2D_wave)
@@ -1048,7 +1094,7 @@ class PressureWaveConfig:
         wave_speed: float = 2.0,
         radius_range: Tuple[float, float] = (0.01, 0.1),
         dot_opacity_range: Tuple[float, float] = (0.2, 0.95),
-        color_range = [MY_PURPLE_A, MY_PURPLE_A, GREY, MY_BLUE_A, MY_BLUE_A],
+        color_range = [QMV_PURPLE_A, QMV_PURPLE_A, GREY, QMV_BLUE_A, QMV_BLUE_A],
         base_color = GREY,
     ):
         self.u_range = u_range
@@ -1238,15 +1284,15 @@ class PressureWaveAnimationScene(InteractiveScene):
     def construct(self):
         p_wave = SphericalPressureWaveMedium(R=3.5)
         m_label = VGroup(
-            Tex(R"m = ", t2c = {"m": MY_PURPLE_B}),
+            Tex(R"m = ", t2c = {"m": QMV_PURPLE_B}),
             Integer(0)
         ).arrange(RIGHT)
         n_label = VGroup(
-            Tex(R"n = ", t2c = {"n": MY_PURPLE_C}),
+            Tex(R"n = ", t2c = {"n": QMV_PURPLE_C}),
             Integer(0)
         ).arrange(RIGHT)
         l_label = VGroup(
-            Tex(R"l = ", t2c = {"l": MY_PURPLE_A}),
+            Tex(R"l = ", t2c = {"l": QMV_PURPLE_A}),
             Integer(0)
         ).arrange(RIGHT)
         mode_labels = VGroup(l_label, m_label, n_label).arrange(DOWN).fix_in_frame().to_corner(UL)
@@ -1281,15 +1327,15 @@ class PressureSphereShowcase(InteractiveScene):
     def construct(self):
         p_wave = SphericalPressureWaveMedium(R=3.5)
         m_label = VGroup(
-            Tex(R"m = ", t2c = {"m": MY_PURPLE_B}),
+            Tex(R"m = ", t2c = {"m": QMV_PURPLE_B}),
             Integer(0)
         ).arrange(RIGHT)
         n_label = VGroup(
-            Tex(R"n = ", t2c = {"n": MY_PURPLE_C}),
+            Tex(R"n = ", t2c = {"n": QMV_PURPLE_C}),
             Integer(0)
         ).arrange(RIGHT)
         l_label = VGroup(
-            Tex(R"l = ", t2c = {"l": MY_PURPLE_A}),
+            Tex(R"l = ", t2c = {"l": QMV_PURPLE_A}),
             Integer(0)
         ).arrange(RIGHT)
         mode_labels = VGroup(l_label, m_label, n_label).arrange(DOWN).fix_in_frame().to_corner(UL)

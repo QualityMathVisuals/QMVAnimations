@@ -245,7 +245,7 @@ class Chapter1Scene(InteractiveScene):
         axes.add_coordinate_labels([0, 1], [-1, 1])
         self.play(FadeOut(moral_wave_text), DrawBorderThenFill(axes))
         self.play(LaggedStart(*[ShowCreation(txt) for txt in [t_label, t_value, x_label, y_label.shift(DOWN * 0.6)]]))
-        standing_wave = StandingWave(mode=2, config=wave_config, color=MY_BLUE_B)
+        standing_wave = StandingWave(mode=2, config=wave_config, color=QMV_BLUE_B)
         self.play(ShowCreation(standing_wave))
         self.wait()
 
@@ -259,7 +259,7 @@ class Chapter1Scene(InteractiveScene):
         # Move the height of the amplitude up and down, change the mode of the graph, ending on a single mode, then back to 2.
         standing_wave.clear_updaters()
         more_standing_waves = [
-            StandingWave(mode=n, config=wave_config, color=MY_BLUE_A)
+            StandingWave(mode=n, config=wave_config, color=QMV_BLUE_A)
             for n in range(1, 14)
         ]
         self.play(standing_wave.animate.stretch(2, 1), rate_func=there_and_back, run_time=1.5)
@@ -281,18 +281,18 @@ class Chapter1Scene(InteractiveScene):
             t2c={R"t": YELLOW, R"x": PINK,"y": WHITE},
             isolate=isolate_tex + ["n"]
         ).scale(1.3).next_to(desired_form_again, RIGHT)
-        general_sol["n"].set_color_by_gradient(MY_BLUE_A)
+        general_sol["n"].set_color_by_gradient(QMV_BLUE_A)
         dense = Text(R"Dense").set_color_by_gradient(RED_D, PURPLE_A).scale(5)
         self.play(Uncreate(more_standing_waves[1]), t_tracker.animate.set_value(0), TransformMatchingStrings(solutions[-1], general_sol))
         self.play(FadeIn(dense), run_time=0.15)
         self.play(FadeOut(dense, scale=0.1), run_time=2)
         num_many_waves = 100
-        color_grad = color_gradient([MY_BLUE_A, MY_PURPLE_A, MY_BLUE_C, MY_PURPLE_C], num_many_waves)
+        color_grad = color_gradient([QMV_BLUE_A, QMV_PURPLE_A, QMV_BLUE_C, QMV_PURPLE_C], num_many_waves)
         colored_standing_waves = [
             StandingWave(mode=n, config=wave_config, color=color_grad[n - 1])
             for n in range(1, num_many_waves + 1)
         ]
-        N_label = VGroup(Tex("N = ", t2c = {"N": MY_PURPLE_C}), Integer(10)).arrange(RIGHT).next_to(t_value, RIGHT, buff=1)
+        N_label = VGroup(Tex("N = ", t2c = {"N": QMV_PURPLE_C}), Integer(10)).arrange(RIGHT).next_to(t_value, RIGHT, buff=1)
         self.play(Write(N_label))
         self.play(
             LaggedStart(*[
@@ -302,7 +302,7 @@ class Chapter1Scene(InteractiveScene):
             run_time=5,
             rate_func=slow_into
         )
-        N_label_again =  VGroup(Tex("N = ", t2c = {"N": MY_PURPLE_C}), Integer(100)).arrange(RIGHT).move_to(N_label, aligned_edge=LEFT)
+        N_label_again =  VGroup(Tex("N = ", t2c = {"N": QMV_PURPLE_C}), Integer(100)).arrange(RIGHT).move_to(N_label, aligned_edge=LEFT)
         self.play(TransformMatchingParts(N_label, N_label_again))
         self.play(
             LaggedStart(*[
@@ -328,17 +328,17 @@ class Chapter1Scene(InteractiveScene):
         third_amp_config.amplitude = 2/3
         individual_standing_waves = [
             VGroup(
-                StandingWave(mode=1, config=half_amp_config, color=MY_BLUE_A),
-                StandingWave(mode=3, config=half_amp_config, color=MY_PURPLE_A),
+                StandingWave(mode=1, config=half_amp_config, color=QMV_BLUE_A),
+                StandingWave(mode=3, config=half_amp_config, color=QMV_PURPLE_A),
             ),
             VGroup(
-                StandingWave(mode=2, config=third_amp_config, color=MY_BLUE_A),
-                StandingWave(mode=7, config=wave_config, color=MY_PURPLE_A),
+                StandingWave(mode=2, config=third_amp_config, color=QMV_BLUE_A),
+                StandingWave(mode=7, config=wave_config, color=QMV_PURPLE_A),
             ),
             VGroup(
-                StandingWave(mode=1, config=wave_config, color=MY_BLUE_A),
-                StandingWave(mode=2, config=half_amp_config, color=MY_BLUE_C),
-                StandingWave(mode=5, config=third_amp_config, color=MY_PURPLE_A),
+                StandingWave(mode=1, config=wave_config, color=QMV_BLUE_A),
+                StandingWave(mode=2, config=half_amp_config, color=QMV_BLUE_C),
+                StandingWave(mode=5, config=third_amp_config, color=QMV_PURPLE_A),
             ),
         ]
         t_tracker.set_value(0)
@@ -349,14 +349,14 @@ class Chapter1Scene(InteractiveScene):
             R"""
             \frac{1}{2} \sin (\pi x) \cos (\pi t)
             """,
-            t2c={R"\pi": MY_BLUE_A, "t": YELLOW, R"x": PINK,"y": WHITE},
+            t2c={R"\pi": QMV_BLUE_A, "t": YELLOW, R"x": PINK,"y": WHITE},
             isolate=isolate_tex
         )
         tripple_mode_eq = Tex(
             R"""
             \frac{1}{2}\sin (3\pi x) \cos (3\pi t)
             """,
-            t2c={R"3\pi": MY_PURPLE_A, "t": YELLOW, R"x": PINK,"y": WHITE},
+            t2c={R"3\pi": QMV_PURPLE_A, "t": YELLOW, R"x": PINK,"y": WHITE},
             isolate=isolate_tex
         )
         addition_symbol = Tex("+")
@@ -367,7 +367,7 @@ class Chapter1Scene(InteractiveScene):
         for wave in individual_standing_waves[0]:
             wave.attach_value_tracker(t_tracker)
         self.play(t_tracker.animate.increment_value(5), rate_func=linear, run_time=5)
-        wave_sum = SummedWave(*individual_standing_waves[0], config=wave_config, t_initial=t_tracker.get_value()).set_color_by_gradient(MY_BLUE_A, MY_PURPLE_A)
+        wave_sum = SummedWave(*individual_standing_waves[0], config=wave_config, t_initial=t_tracker.get_value()).set_color_by_gradient(QMV_BLUE_A, QMV_PURPLE_A)
         for wave_gp in individual_standing_waves:
             for wave in wave_gp:
                 wave.suspend_updating()
@@ -379,27 +379,27 @@ class Chapter1Scene(InteractiveScene):
             ) for wave in individual_standing_waves[0]],
         )
         wave_sum.attach_value_tracker(t_tracker)
-        wave_sum.add_updater(lambda m: m.set_color_by_gradient(MY_BLUE_A, MY_PURPLE_A))
+        wave_sum.add_updater(lambda m: m.set_color_by_gradient(QMV_BLUE_A, QMV_PURPLE_A))
         self.play(t_tracker.animate.increment_value(5), rate_func=linear, run_time=5)
         double_mode_eq = Tex(
             R"""
             \frac{1}{3}\sin (2\pi x) \cos (2\pi t)
             """,
-            t2c={R"2\pi": MY_BLUE_A, "t": YELLOW, R"x": PINK,"y": WHITE},
+            t2c={R"2\pi": QMV_BLUE_A, "t": YELLOW, R"x": PINK,"y": WHITE},
             isolate=isolate_tex
         )
         sev_mode_eq = Tex(
             R"""
             \sin (7\pi x) \cos (7\pi t)
             """,
-            t2c={R"7\pi": MY_PURPLE_A, "t": YELLOW, R"x": PINK,"y": WHITE},
+            t2c={R"7\pi": QMV_PURPLE_A, "t": YELLOW, R"x": PINK,"y": WHITE},
             isolate=isolate_tex
         )
         add_copy = addition_symbol.copy()
         summing_modes_tex = VGroup(double_mode_eq, add_copy, sev_mode_eq).arrange(RIGHT).shift(3 * DOWN)
         wave_sum_prev = wave_sum
         wave_sum_prev.clear_updaters()
-        wave_sum = SummedWave(*individual_standing_waves[1], config=wave_config, t_initial=t_tracker.get_value()).set_color_by_gradient(MY_BLUE_A, MY_PURPLE_A)
+        wave_sum = SummedWave(*individual_standing_waves[1], config=wave_config, t_initial=t_tracker.get_value()).set_color_by_gradient(QMV_BLUE_A, QMV_PURPLE_A)
         self.play(
             TransformMatchingStrings(single_mode_eq, double_mode_eq),
             TransformMatchingStrings(tripple_mode_eq, sev_mode_eq),
@@ -417,34 +417,34 @@ class Chapter1Scene(InteractiveScene):
             ) for wave in individual_standing_waves[1]],
         )
         wave_sum.attach_value_tracker(t_tracker)
-        wave_sum.add_updater(lambda m: m.set_color_by_gradient(MY_BLUE_A, MY_PURPLE_A))
+        wave_sum.add_updater(lambda m: m.set_color_by_gradient(QMV_BLUE_A, QMV_PURPLE_A))
         self.play(t_tracker.animate.increment_value(5), rate_func=linear, run_time=5)
         final_sing_mode_eq = Tex(
             R"""
             \sin (\pi x) \cos (\pi t)
             """,
-            t2c={R"\pi": MY_BLUE_A, "t": YELLOW, R"x": PINK,"y": WHITE},
+            t2c={R"\pi": QMV_BLUE_A, "t": YELLOW, R"x": PINK,"y": WHITE},
             isolate=isolate_tex
         )
         final_double_mode_eq = Tex(
             R"""
             \frac{1}{2} \sin (2\pi x) \cos (2\pi t)
             """,
-            t2c={R"2\pi": MY_BLUE_C, "t": YELLOW, R"x": PINK,"y": WHITE},
+            t2c={R"2\pi": QMV_BLUE_C, "t": YELLOW, R"x": PINK,"y": WHITE},
             isolate=isolate_tex
         )
         final_fifth_mode_eq = Tex(
             R"""
             \frac{1}{3} \sin (5\pi x) \cos (5\pi t)
             """,
-            t2c={R"5\pi": MY_PURPLE_A, "t": YELLOW, R"x": PINK,"y": WHITE},
+            t2c={R"5\pi": QMV_PURPLE_A, "t": YELLOW, R"x": PINK,"y": WHITE},
             isolate=isolate_tex
         )
         add_copy = addition_symbol.copy()
         summing_modes_tex = VGroup(final_sing_mode_eq, add_copy, final_double_mode_eq, add_copy.copy(), final_fifth_mode_eq).arrange(RIGHT).shift(3 * DOWN).scale(0.9)
         wave_sum_prev = wave_sum
         wave_sum_prev.clear_updaters()
-        wave_sum = SummedWave(*individual_standing_waves[2], config=wave_config, t_initial=0).set_color_by_gradient(MY_BLUE_A, MY_PURPLE_A)
+        wave_sum = SummedWave(*individual_standing_waves[2], config=wave_config, t_initial=0).set_color_by_gradient(QMV_BLUE_A, QMV_PURPLE_A)
         self.play(
             TransformMatchingStrings(double_mode_eq, final_sing_mode_eq),
             TransformMatchingStrings(sev_mode_eq, final_double_mode_eq),
@@ -465,19 +465,19 @@ class Chapter1Scene(InteractiveScene):
             ) for wave in individual_standing_waves[2]],
         )
         wave_sum.attach_value_tracker(t_tracker)
-        wave_sum.add_updater(lambda m: m.set_color_by_gradient(MY_BLUE_A, MY_PURPLE_A))
+        wave_sum.add_updater(lambda m: m.set_color_by_gradient(QMV_BLUE_A, QMV_PURPLE_A))
         self.play(t_tracker.animate.increment_value(5), rate_func=linear, run_time=5)
         wave_sum.clear_updaters()
         self.play(Uncreate(wave_sum), FadeOut(summing_modes_tex))
 
         # Show summing towards more complicated shapes, like a big square, a triangle, a square, a rectangle at the same time, a city skyline, a coffee mug
         N_value = ValueTracker(10)
-        N_label = VGroup(Tex("N = ", t2c = {"N": MY_PURPLE_C}), Integer(N_value.get_value())).arrange(RIGHT).next_to(t_value, RIGHT, buff=1)
+        N_label = VGroup(Tex("N = ", t2c = {"N": QMV_PURPLE_C}), Integer(N_value.get_value())).arrange(RIGHT).next_to(t_value, RIGHT, buff=1)
         finite_sum_eq = Tex(
             R"""
             y(x, t) = \sum_{n = 1}^N A_n \sin (n\pi x) \cos (n\pi t)
             """,
-            t2c={R"n\pi": MY_BLUE_A, "t": YELLOW, R"x": PINK,"y": WHITE, "N": MY_PURPLE_C, "A_n": RED_C},
+            t2c={R"n\pi": QMV_BLUE_A, "t": YELLOW, R"x": PINK,"y": WHITE, "N": QMV_PURPLE_C, "A_n": RED_C},
             isolate=isolate_tex
         ).to_corner(DL, buff=1).shift(DOWN * 0.3)
         self.play(
@@ -494,7 +494,7 @@ class Chapter1Scene(InteractiveScene):
             R"""
             y(x, 0) 
             """,
-            t2c={R"n\pi": MY_BLUE_A, "t": YELLOW, R"x": PINK,"y": WHITE, "N": MY_PURPLE_C, "A_n": RED_C},
+            t2c={R"n\pi": QMV_BLUE_A, "t": YELLOW, R"x": PINK,"y": WHITE, "N": QMV_PURPLE_C, "A_n": RED_C},
             isolate=isolate_tex
         ).next_to(axes, UP).shift(DOWN * 0.3 + RIGHT * 4)
         square_pts = [
@@ -505,7 +505,7 @@ class Chapter1Scene(InteractiveScene):
             (7.05, 0),
             (L, 0)
         ]
-        vis_config = WaveVisualizationConfig(int(N_value.get_value()), [MY_BLUE_A, MY_PURPLE_A])
+        vis_config = WaveVisualizationConfig(int(N_value.get_value()), [QMV_BLUE_A, QMV_PURPLE_A])
         fourier_group = FourierGroup(
             num_harmonics=int(N_value.get_value()),
             wave_function=square_pts,
@@ -535,7 +535,7 @@ class Chapter1Scene(InteractiveScene):
                 Rf"""
                     {scaled_coeffs[n - 1]} \sin ({n}\pi x)
                 """,
-                t2c={Rf"{n}\pi": MY_BLUE_A, "t": YELLOW, R"x": PINK,"y": WHITE, "N": MY_PURPLE_C, scaled_coeffs[n - 1]: RED_C},
+                t2c={Rf"{n}\pi": QMV_BLUE_A, "t": YELLOW, R"x": PINK,"y": WHITE, "N": QMV_PURPLE_C, scaled_coeffs[n - 1]: RED_C},
                 isolate=isolate_tex
             ).next_to(axes, DOWN).shift(UP)
             for n in range(1, int(N_value.get_value()) + 1)
@@ -545,7 +545,7 @@ class Chapter1Scene(InteractiveScene):
                 Rf"""
                     \cos({n}\pi t)
                 """,
-                t2c={Rf"{n}\pi": MY_BLUE_A, "t": YELLOW,},
+                t2c={Rf"{n}\pi": QMV_BLUE_A, "t": YELLOW,},
                 isolate=isolate_tex
             ).next_to(equations_of_sins[n - 1], RIGHT)
             for n in range(1, int(N_value.get_value()) + 1)
@@ -579,7 +579,7 @@ class Chapter1Scene(InteractiveScene):
         cake_config = copy.deepcopy(wave_config)
         cake_config.resolution=50
         cake_N = 50
-        vis_config = WaveVisualizationConfig(cake_N, [MY_BLUE_A, MY_PURPLE_A])
+        vis_config = WaveVisualizationConfig(cake_N, [QMV_BLUE_A, QMV_PURPLE_A])
         fourier_group = FourierGroup(
             num_harmonics=cake_N,
             wave_function=cake_points,
@@ -647,7 +647,7 @@ class Chapter1Scene(InteractiveScene):
         sky_line_config = copy.deepcopy(wave_config)
         sky_line_config.resolution=100
         sky_line_N = 75
-        vis_config = WaveVisualizationConfig(sky_line_N, [MY_BLUE_A, MY_PURPLE_A])
+        vis_config = WaveVisualizationConfig(sky_line_N, [QMV_BLUE_A, QMV_PURPLE_A])
         fourier_group = FourierGroup(
             num_harmonics=sky_line_N,
             wave_function=city_skyline_points,
@@ -707,7 +707,7 @@ class Chapter1Scene(InteractiveScene):
         points_A += [(2, 2)]
         points_A += [(L, 0)]
         N = 5
-        vis_config = WaveVisualizationConfig(N, [MY_BLUE_A, MY_PURPLE_A])
+        vis_config = WaveVisualizationConfig(N, [QMV_BLUE_A, QMV_PURPLE_A])
         guitar_string_gp = FourierGroup(
             num_harmonics=N,
             wave_function=points_A,
@@ -747,7 +747,7 @@ class Chapter1Scene(InteractiveScene):
                 Rf"""
                     {scaled_coeffs[n - 1]} \sin ({n}\pi x)
                 """,
-                t2c={Rf"{n}\pi": MY_BLUE_A, "t": YELLOW, R"x": PINK,"y": WHITE, "N": MY_PURPLE_C, scaled_coeffs[n - 1]: RED_C},
+                t2c={Rf"{n}\pi": QMV_BLUE_A, "t": YELLOW, R"x": PINK,"y": WHITE, "N": QMV_PURPLE_C, scaled_coeffs[n - 1]: RED_C},
                 isolate=isolate_tex
             ).next_to(axes, DOWN).shift(UP)
             for n in range(1, int(N_value.get_value()) + 1)
@@ -757,7 +757,7 @@ class Chapter1Scene(InteractiveScene):
                 Rf"""
                     \cos({n}\pi t)
                 """,
-                t2c={Rf"{n}\pi": MY_BLUE_A, "t": YELLOW,},
+                t2c={Rf"{n}\pi": QMV_BLUE_A, "t": YELLOW,},
                 isolate=isolate_tex
             ).next_to(equations_of_sins[n - 1], RIGHT)
             for n in range(1, int(N_value.get_value()) + 1)
@@ -817,7 +817,7 @@ class Chapter1Scene(InteractiveScene):
         most_important_label = Text(R"Largest Contributors:").scale(0.7).next_to(copy_axes, DOWN, buff=0.0)
         self.play(Write(most_important_label))
         def get_final_anim_group(num_waves, example, config=wave_config):
-            vis_config = WaveVisualizationConfig(num_waves, [MY_BLUE_A, MY_PURPLE_A])
+            vis_config = WaveVisualizationConfig(num_waves, [QMV_BLUE_A, QMV_PURPLE_A])
             fourier_gp = FourierGroup(
                 num_harmonics=num_waves,
                 wave_function=example,
@@ -834,7 +834,7 @@ class Chapter1Scene(InteractiveScene):
             standing_waves.add_updater(lambda m: m.shift(UP))
             largest_contributors = VGroup(*sorted_prior).clear_updaters()
             largest_contributors.shift(UP).set_stroke(opacity=0.7).scale(0.5, about_point=axes.get_center()).shift(DOWN * 3.5 + LEFT * 3.5)
-            colors_of_largest = color_gradient([MY_BLUE_A, MY_PURPLE_A], 5)
+            colors_of_largest = color_gradient([QMV_BLUE_A, QMV_PURPLE_A], 5)
             for i, wave in enumerate(largest_contributors):
                 wave.attach_value_tracker(t_tracker)
                 wave.set_color(colors_of_largest[i])

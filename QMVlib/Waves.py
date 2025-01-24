@@ -4,8 +4,9 @@ import numpy as np
 import copy
 import hashlib
 from scipy import integrate
+from scipy.special import jn_zeros, jv
 from typing import Callable, List, Tuple, Optional, Union, Type
-from QMVlib.humanfaces import ObamaFace
+from QMVlib import *
 
 class Wave1DConfig:
     """Configuration settings for pressure wave properties"""
@@ -398,6 +399,96 @@ class RectangularFourierWave2D(RectangularWave2D):
         return self.t_tracker
 
 
+class RadialWave2D(Wave2DMobject, ABC):
+    def __init__(self, radius: float = 5, dampening=0.0, **kwargs):
+        wave_config = Wave2DConfig()
+        wave_config.u_range = (0, radius)
+        wave_config.v_range = (0, TAU)
+        wave_config.dampening = dampening
+        self.radius = radius
+        super().__init__(wave_config=wave_config, **kwargs)
+
+    def init_wave_medium(self):
+        x_func = lambda u, v: np.cos(v) * u
+        y_func = lambda u, v: np.sin(v) * u
+        return x_func, y_func
+        
+    def _standing_wave_function(self, mode, amplitude, phase) -> Callable:
+        n, m = mode
+        if n == 0 and m > 0:
+            jmn = 0
+        elif n > 0 and m >= 0: 
+            jmn = jn_zeros(m, n)[-1]
+        else:
+            raise ValueError(f'Values of m ({m}) and n ({n}) are invalid')
+        k = jmn / self.radius
+        omega = self.wave_config.wave_speed * k
+        beta = self.wave_config.dampening
+        omega = np.sqrt(omega ** 2 - beta ** 2)
+        def standing_wave_func(u, v, t):
+            r_comp = jv(m, k * u)
+            thta_comp = np.cos(m * v + phase)
+            return amplitude * r_comp * thta_comp * np.cos(omega * t) * np.exp(-beta * t)
+        return standing_wave_func
+
+
+class RadialStandingWave2D(RadialWave2D):
+    def __init__(self, m: int, n: int, amplitude=1, phase=0, **kwargs):
+        super().__init__( **kwargs)
+        self.mode = (m, n)
+        self.amplitude = amplitude
+        self.t_tracker = self.add_standing_wave(self.mode, amplitude=amplitude, phase=phase)
+
+    def get_time_tracker(self):
+        return self.t_tracker
+
+
+class RadialStillWave2D(RadialWave2D):
+    def __init__(self, function: Callable, **kwargs):
+        self.function = function
+        super().__init__( **kwargs)
+        self.clear_updaters()
+        self.add_standing_wave((0, 0))
+
+    def _standing_wave_function(self, mode, amplitude, phase) -> Callable:
+        return lambda u, v, t: self.function(u, v)
+
+
+class RadialFourierWave2D(RadialWave2D):
+    def __init__(self, function: Callable, num_standing_waves: Tuple[int, int], save_coefficients=True, **kwargs):
+        super().__init__(**kwargs)
+        self.t_tracker = ValueTracker(0)
+        self.convolution_coeffs = self._get_fourier_coeffs(function, radius, num_standing_waves, save_coefficients)
+        for mode in self.convolution_coeffs.keys():
+            self.add_standing_wave(mode, *self.convolution_coeffs[mode], t_tracker=self.t_tracker)
+
+
+    def _get_fourier_coeffs(self, function, radius, num_standing_waves, save_coefficients):
+        uuid=None
+        if save_coefficients:
+            #Throw a bunch of things in the hash
+            u_ins = np.linspace(*self.wave_config.u_range, 25)
+            v_ins = np.linspace(*self.wave_config.v_range, 25)
+            points_for_hash = [int(function(u, v) * 1000) for u in u_ins for v in v_ins]
+            uuid = FourierCalculator.calculate_uuid(
+                2, 'radial', 
+                self.wave_config.u_range,
+                self.wave_config.v_range,
+                *points_for_hash,
+            )            
+        calculator = FourierCalculator(function, save_coefficients, uuid=uuid)
+        coeffs = {}
+        for n in range(num_standing_waves[0]):
+            for m in range(num_standing_waves[1]):
+                coeffs[(m, n)] = calculator.radial_fourier_coefficients(m, n, radius)
+        calculator.update_cache()
+        return coeffs
+
+    def get_time_tracker(self):
+        return self.t_tracker
+
+
+
 class FourierCalculator:
     def __init__(self, surface_z, save_coefficients, uuid=None):
         if save_coefficients:
@@ -519,10 +610,10 @@ class FourierCalculator:
             self.should_update_cache = False
 
 
-
-class Wave2DExampleScene(InteractiveScene):
+class Radial2DExampleScene(InteractiveScene):
     def construct(self):
-        standing_wave = RectangularStandingWave2D(2, 1, amplitude=3, colors_for_height=[BLUE, GREY_B, PINK])
+        #Standing Wave
+        standing_wave = RadialStandingWave2D(2, 1, amplitude=3, colors_for_height=[QMV_BLUE_C, GREY_B, QMV_PINK_C])
         self.play(ShowCreation(standing_wave, suspend_mobject_updating=True))
         t_tracker = standing_wave.get_time_tracker()
         self.play(
@@ -531,6 +622,8 @@ class Wave2DExampleScene(InteractiveScene):
             rate_func=linear
         )
         self.remove(standing_wave)
+
+        #Standing Wave Mesh
         standing_wave_mesh = standing_wave.get_mesh()
         self.play(ShowCreation(standing_wave_mesh, suspend_mobject_updating=True))
         self.play(
@@ -539,12 +632,57 @@ class Wave2DExampleScene(InteractiveScene):
             rate_func=linear
         )
         self.remove(standing_wave_mesh)
+
+        #Face Wave
+        radius = 4
+        pt_to_surface_z = ObamaFace(max_dist_from_center=radius).get_3D_param_radial(radius)
+        still_wave = RadialStillWave2D(pt_to_surface_z, resolution=(50, 50))
+        self.play(ShowCreation(still_wave))
+        self.remove(still_wave)
+
+        # Fourier Wave
+        fourier_wave = RadialFourierWave2D(pts_to_surface_z, (5, 5), colors_for_height=[BLUE, GREY_B, PINK])
+        self.play(ShowCreation(fourier_wave, suspend_mobject_updating=True))
+        t_tracker = fourier_wave.get_time_tracker()
+        self.play(
+            t_tracker.animate.increment_value(10),
+            run_time=10,
+            rate_func=linear
+        )
+
+
+
+class Rectangular2DExampleScene(InteractiveScene):
+    def construct(self):
+        #Standing Wave
+        standing_wave = RectangularStandingWave2D(2, 1, amplitude=3, colors_for_height=[QMV_BLUE_C, GREY_B, QMV_PINK_C])
+        self.play(ShowCreation(standing_wave, suspend_mobject_updating=True))
+        t_tracker = standing_wave.get_time_tracker()
+        self.play(
+            t_tracker.animate.increment_value(10),
+            run_time=10,
+            rate_func=linear
+        )
+        self.remove(standing_wave)
+
+        #Standing Wave Mesh
+        standing_wave_mesh = standing_wave.get_mesh()
+        self.play(ShowCreation(standing_wave_mesh, suspend_mobject_updating=True))
+        self.play(
+            t_tracker.animate.increment_value(10),
+            run_time=10,
+            rate_func=linear
+        )
+        self.remove(standing_wave_mesh)
+
+        #Face Wave
         width, height = 8, 6
         pts_to_surface_z = ObamaFace().get_3D_param_rectangular(width, height)
         still_wave = RectangularStillWave2D(pts_to_surface_z, resolution=(50, 50))
         self.play(ShowCreation(still_wave))
         self.remove(still_wave)
 
+        # Fourier Wave
         fourier_wave = RectangularFourierWave2D(pts_to_surface_z, (5, 5), colors_for_height=[BLUE, GREY_B, PINK])
         self.play(ShowCreation(fourier_wave, suspend_mobject_updating=True))
         t_tracker = fourier_wave.get_time_tracker()
