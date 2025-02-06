@@ -88,7 +88,6 @@ class StandingWave1D(Wave1DMobject):
         return self.t_tracker
 
 
-# wave_def is a function
 class FourierWave1D(Wave1DMobject):
     def __init__(self, wave_def: Callable[float, float], num_standing_waves, length=1, dampening=0.0, **kwargs):
         wave_config = Wave1DConfig()
@@ -175,6 +174,7 @@ class StillWave1D(Wave1DMobject):
 
 class Wave1DExampleScene(InteractiveScene):
     def construct(self):
+        # Create basic standing wave, then move it around
         standing_wave = StandingWave1D(mode=1, length=10, amplitude=3, color=BLUE_B)
         self.play(ShowCreation(standing_wave, suspend_mobject_updating=True))
         t_tracker = standing_wave.get_time_tracker()
@@ -185,6 +185,7 @@ class Wave1DExampleScene(InteractiveScene):
         )
         self.remove(standing_wave)
 
+        # Create fourier interpolated wave from function. Move it around
         example_func = lambda x: 1/3 * x * np.sin(x)
         fourier_wave = FourierWave1D(example_func, 10, length=10)
         self.play(ShowCreation(fourier_wave, suspend_mobject_updating=True))
@@ -196,6 +197,7 @@ class Wave1DExampleScene(InteractiveScene):
         )
         self.remove(fourier_wave)
 
+        # Create fourier interpolated wave from point interpolated string. Move it around
         example_points = [
             (0, 0),
             (1, 2),
@@ -208,7 +210,7 @@ class Wave1DExampleScene(InteractiveScene):
             (9.99, 3),
             (10, 0),
         ]
-        point_fourier_wave = RigidFourierWave1D(example_points, 25, length=10)
+        point_fourier_wave = RigidFourierWave1D(example_points, 35, length=10)
         self.play(ShowCreation(point_fourier_wave, suspend_mobject_updating=True))
         t_tracker = point_fourier_wave.get_time_tracker()
         self.play(
