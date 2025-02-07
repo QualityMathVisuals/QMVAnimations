@@ -16,11 +16,13 @@ class Wave1DConfig:
         resolution: int = 10,
         dampening: float = 0.0,
         wave_speed: float = 2.0,
+        colors_for_height: Optional[Tuple[Color, Color]] = None
     ):
         self.u_range = u_range
         self.resolution = resolution
         self.dampening = dampening
         self.wave_speed = wave_speed
+        self.colors_for_height = colors_for_height
 
 
 class Wave1DMobject(TipableVMobject):
@@ -45,7 +47,12 @@ class Wave1DMobject(TipableVMobject):
         if len(points) > 0:
             self.set_points_smoothly(points)
             self.put_start_and_end_on(self.start, self.end)
+            if self.wave_config.colors_for_height:
+                color_map = get_colormap_from_colors(self.wave_config.colors_for_height)
+                self.data['stroke_rgba'][:] = [color_map([sigmoid(point[1])])[0] for point in self.get_points()]
 
+    def sigmoid(x):
+        return 1/(1 + np.exp(-z))
 
     def add_standing_wave(self, mode, amplitude=1, t_tracker: Optional[ValueTracker] = None, t_initial=0) -> ValueTracker:
         t_tracker = t_tracker if t_tracker is not None else ValueTracker(t_initial)
@@ -77,7 +84,10 @@ class Wave1DMobject(TipableVMobject):
 
 class StandingWave1D(Wave1DMobject):
     def __init__(self, mode, length=1, amplitude=1, dampening=0.0, **kwargs):
-        wave_config = Wave1DConfig()
+        if 'wave_config' in kwargs:
+            wave_config = kwargs.pop('wave_config')
+        else:
+            wave_config = Wave1DConfig()
         wave_config.u_range = (0, length)
         wave_config.dampening = dampening
         super().__init__(wave_config=wave_config, **kwargs)
@@ -90,7 +100,10 @@ class StandingWave1D(Wave1DMobject):
 
 class FourierWave1D(Wave1DMobject):
     def __init__(self, wave_def: Callable[float, float], num_standing_waves, length=1, dampening=0.0, **kwargs):
-        wave_config = Wave1DConfig()
+        if 'wave_config' in kwargs:
+            wave_config = kwargs.pop('wave_config')
+        else:
+            wave_config = Wave1DConfig()
         wave_config.u_range = (0, length)
         wave_config.dampening = dampening
         super().__init__(wave_config=wave_config, **kwargs)
@@ -145,7 +158,10 @@ class RigidFourierWave1D(FourierWave1D):
 
 class StillWave1D(Wave1DMobject):
     def __init__(self, wave_def: Callable[float, float] | List[Tuple[float, float]], length=1, **kwargs):
-        wave_config = Wave1DConfig()
+        if 'wave_config' in kwargs:
+            wave_config = kwargs.pop('wave_config')
+        else:
+            wave_config = Wave1DConfig()
         wave_config.u_range = (0, length)
         super().__init__(wave_config=wave_config, **kwargs)
         function = self._create_wave_function(wave_def)
@@ -170,6 +186,37 @@ class StillWave1D(Wave1DMobject):
             raise ValueError(f"x={x} is out of bounds of the provided points. points[0] = {points[0]}, points[-1] = {points[-1]}")
         
         return interpolate_points
+
+
+class WaveFourierBand1D(FourierWave1D):
+    def init_wave_medium(self):
+        self.start = 3 * RIGHT
+        self.end = 3 * RIGHT
+
+    @Mobject.affects_data
+    def set_points_by_wave_functions(self):
+        self.clear_points()
+        fake_x_values = np.linspace(*self.wave_config.u_range, int(self.wave_config.resolution * (self.wave_config.u_range[1] - self.wave_config.u_range[0])))
+        fake_y_values = np.array([self.wave_function(x) for x in fake_x_values])
+
+        theta_values = np.linspace(- 3 * PI / 2, PI / 2, int(self.wave_config.resolution * (self.wave_config.u_range[1] - self.wave_config.u_range[0])))
+        x_values = 3 * np.cos(theta_values)
+        y_values = 3 * np.sin(theta_values)
+        points = np.column_stack((x_values, y_values, fake_y_values))
+
+        if len(points) > 0:
+            self.set_points_smoothly(points)
+            if self.wave_config.colors_for_height:
+                color_map = get_colormap_from_colors(self.wave_config.colors_for_height)
+                self.data['stroke_rgba'][:] = [color_map([sigmoid(point[2])])[0] for point in self.get_points()]
+
+class WaveFourierRigidBand1D(RigidFourierWave1D):
+    def init_wave_medium(self):
+        WaveFourierBand.init_wave_medium(self)
+
+    @Mobject.affects_data
+    def set_points_by_wave_functions(self):
+        WaveFourierBand.set_points_by_wave_functions(self)
 
 
 class Wave1DExampleScene(InteractiveScene):
