@@ -188,7 +188,7 @@ class StillWave1D(Wave1DMobject):
         return interpolate_points
 
 
-class WaveFourierBand1D(FourierWave1D):
+class FourierWave1DBand(FourierWave1D):
     def init_wave_medium(self):
         self.start = 3 * RIGHT
         self.end = 3 * RIGHT
@@ -210,13 +210,14 @@ class WaveFourierBand1D(FourierWave1D):
                 color_map = get_colormap_from_colors(self.wave_config.colors_for_height)
                 self.data['stroke_rgba'][:] = [color_map([sigmoid(point[2])])[0] for point in self.get_points()]
 
-class WaveFourierRigidBand1D(RigidFourierWave1D):
+
+class RigidFourierWave1DBand(RigidFourierWave1D):
     def init_wave_medium(self):
-        WaveFourierBand.init_wave_medium(self)
+        FourierWave1DBand.init_wave_medium(self)
 
     @Mobject.affects_data
     def set_points_by_wave_functions(self):
-        WaveFourierBand.set_points_by_wave_functions(self)
+        FourierWave1DBand.set_points_by_wave_functions(self)
 
 
 class Wave1DExampleScene(InteractiveScene):
